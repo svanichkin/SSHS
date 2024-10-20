@@ -14,15 +14,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # ========================================================
-      #
-      # Step 1: Build your artifacts for all platforms.
-      #
-      # ========================================================
       - name: Build artifacts for all platforms
         run: |
           platforms=("linux/amd64" "linux/arm64" "windows/amd64" "windows/386" "darwin/amd64" "darwin/arm64" "freebsd/amd64" "freebsd/arm64" "openbsd/amd64" "openbsd/arm64" "netbsd/amd64" "netbsd/arm64")
-          mkdir -p releases
+          mkdir -p releases 
           
           for platform in "${platforms[@]}"; do
             os_arch=(${platform//\// })
@@ -32,20 +27,13 @@ jobs:
             dir_name="releases/${os}_${arch}"
             mkdir -p "$dir_name"
 
-            output_file="$dir_name/sshs"
+            output_file="$dir_name/sshs_${os}_${arch}"
 
             # Build the Go program for the specified OS and architecture
             GOOS=$os GOARCH=$arch go build -o "$output_file" ./...
             echo "$output_file" >> artifacts.txt
           done
 
-      # ========================================================
-      #
-      # Step 2: Add a step to generate the provenance subjects
-      #         as shown below. Update the sha256 sum arguments
-      #         to include all binaries that you generate
-      #
-      # ========================================================
       - name: Generate subject for provenance
         id: hash
         run: |

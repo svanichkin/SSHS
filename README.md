@@ -2,6 +2,8 @@
 
 SSHS is a **simple SSH launcher menu** that allows you to quickly and easily connect to multiple servers with a single click. It simplifies the process of managing SSH connections by automating authentication and replacing the need for manual SSH commands.
 
+![SSHS in action](./sshs.gif)
+
 ## Features
 
 1. **Server List Management**: Easily manage a list of servers with their respective connection parameters (IP address, port, username, and password or SSH keys).

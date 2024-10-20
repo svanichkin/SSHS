@@ -40,14 +40,17 @@ jobs:
 
       - name: Build binary
         if: "!(matrix.goos == 'darwin' && matrix.goarch == '386')"
-        run: GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o build/myproject-${{ matrix.goos }}-${{ matrix.goarch }}
+        run: |
+          mkdir -p build/${{ matrix.goos }}-${{ matrix.goarch }}
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o build/${{ matrix.goos }}-${{ matrix.goarch }}/sshs
+          if [[ "${{ matrix.goos }}" == "windows" ]]; then mv build/${{ matrix.goos }}-${{ matrix.goarch }}/sshs build/${{ matrix.goos }}-${{ matrix.goarch }}/sshs.exe; fi
 
       - name: Upload artifact
         if: "!(matrix.goos == 'darwin' && matrix.goarch == '386')"
         uses: actions/upload-artifact@v3
         with:
-          name: myproject-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: build/myproject-${{ matrix.goos }}-${{ matrix.goarch }}
+          name: sshs-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: build/${{ matrix.goos }}-${{ matrix.goarch }}/
 
   release:
     name: Create GitHub Release
@@ -58,7 +61,7 @@ jobs:
       - name: Download binaries
         uses: actions/download-artifact@v3
         with:
-          name: myproject-${{ matrix.goos }}-${{ matrix.goarch }}
+          name: sshs-${{ matrix.goos }}-${{ matrix.goarch }}
 
       - name: Create Release
         uses: softprops/action-gh-release@v1

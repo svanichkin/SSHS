@@ -87,7 +87,13 @@ jobs:
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: *.tar.gz, *.sha256
+          files: |
+            sshs-linux-amd64.tar.gz
+            sshs-darwin-amd64.tar.gz
+            sshs-windows-amd64.tar.gz
+            sshs-linux-arm64.tar.gz
+            sshs-darwin-arm64.tar.gz
+            *.sha256
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

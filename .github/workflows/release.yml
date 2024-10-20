@@ -14,6 +14,7 @@ jobs:
       matrix:
         goos: [linux, darwin, windows]
         goarch: [amd64, arm64, 386]
+      fail-fast: false
     
     steps:
       - name: Checkout repository
@@ -38,9 +39,11 @@ jobs:
         run: go mod download
 
       - name: Build binary
+        if: "!(matrix.goos == 'darwin' && matrix.goarch == '386')" # Исключить комбинацию darwin/386
         run: GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o build/myproject-${{ matrix.goos }}-${{ matrix.goarch }}
 
       - name: Upload artifact
+        if: "!(matrix.goos == 'darwin' && matrix.goarch == '386')" # Исключить комбинацию darwin/386
         uses: actions/upload-artifact@v3
         with:
           name: myproject-${{ matrix.goos }}-${{ matrix.goarch }}

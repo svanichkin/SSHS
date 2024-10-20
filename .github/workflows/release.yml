@@ -6,71 +6,88 @@ on:
       - 'v*.*.*'
 
 jobs:
-  build:
-    name: Build and Release
+  build_check:
+    name: Check
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        goos: [linux, darwin, windows]
-        goarch: [amd64, arm64, 386]
-      fail-fast: false
-    
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
           go-version: '1.23'
 
-      - name: Cache Go modules
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
+      - name: Build
+        run: go build -v ./...
 
-      - name: Install dependencies
-        run: go mod download
+      - name: Test
+        run: go test -v ./...
 
-      - name: Build binary
-        if: "!(matrix.goos == 'darwin' && matrix.goarch == '386')"
-        run: |
-          mkdir -p build/${{ matrix.goos }}-${{ matrix.goarch }}
-          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o build/${{ matrix.goos }}-${{ matrix.goarch }}/sshs
-          if [[ "${{ matrix.goos }}" == "windows" ]]; then mv build/${{ matrix.goos }}-${{ matrix.goarch }}/sshs build/${{ matrix.goos }}-${{ matrix.goarch }}/sshs.exe; fi
-
-      - name: Upload artifact
-        if: "!(matrix.goos == 'darwin' && matrix.goarch == '386')"
-        uses: actions/upload-artifact@v3
-        with:
-          name: sshs-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: build/${{ matrix.goos }}-${{ matrix.goarch }}/
-
-  release:
-    name: Create GitHub Release
-    needs: build
-    runs-on: ubuntu-latest
-    
+  build:
+    name: Build
+    runs-on: ${{ matrix.os }}
+    needs: build_check
     strategy:
+      fail-fast: false
       matrix:
-        goos: [linux, darwin, windows]
-        goarch: [amd64, arm64, 386]
+        include:
+          - target: amd64
+            os: ubuntu-latest
+            name: sshs-linux-amd64
+
+          - target: amd64
+            os: macOS-latest
+            name: sshs-darwin-amd64
+
+          - target: amd64
+            os: windows-latest
+            name: sshs-windows-amd64
+
+          - target: arm64
+            os: ubuntu-latest
+            name: sshs-linux-arm64
+
+          - target: arm64
+            os: macOS-latest
+            name: sshs-darwin-arm64
 
     steps:
-      - name: Download binaries
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.23'
+
+      - name: Build
+        run: |
+          GOOS=${{ matrix.os }} GOARCH=${{ matrix.target }} go build -o sshs ./...
+          tar czvf ${{ matrix.name }}.tar.gz sshs
+
+      - name: Upload the build as an artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.name }}.tar.gz
+          path: ${{ matrix.name }}.tar.gz
+
+  release:
+    name: Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup | Download Artifacts
         uses: actions/download-artifact@v3
         with:
-          name: sshs-${{ matrix.goos }}-${{ matrix.goarch }}
+          name: sshs-linux-amd64.tar.gz, sshs-darwin-amd64.tar.gz, sshs-windows-amd64.tar.gz, sshs-linux-arm64.tar.gz, sshs-darwin-arm64.tar.gz
 
-      - name: Create Release
+      - name: Setup | Checksums
+        run: for file in *.tar.gz; do openssl dgst -sha256 -r "$file" | awk '{print $1}' > "${file}.sha256"; done
+
+      - name: Release | Add Artifacts to Release
         uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: build/${{ matrix.goos }}-${{ matrix.goarch }}/sshs*
+          files: *.tar.gz, *.sha256
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

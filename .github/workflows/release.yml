@@ -32,23 +32,23 @@ jobs:
       matrix:
         include:
           - target: amd64
-            os: ubuntu-latest
+            os: linux
             name: sshs-linux-amd64
 
           - target: amd64
-            os: macOS-latest
+            os: darwin
             name: sshs-darwin-amd64
 
           - target: amd64
-            os: windows-latest
+            os: windows
             name: sshs-windows-amd64
 
           - target: arm64
-            os: ubuntu-latest
+            os: linux
             name: sshs-linux-arm64
 
           - target: arm64
-            os: macOS-latest
+            os: darwin
             name: sshs-darwin-arm64
 
     steps:

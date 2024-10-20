@@ -1,6 +1,6 @@
 module main
 
-go 1.22.5
+go 1.23
 
 require github.com/rivo/tview v0.0.0-20240921122403-a64fc48d7654
 

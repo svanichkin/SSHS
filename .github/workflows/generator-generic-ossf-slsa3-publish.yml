@@ -37,10 +37,14 @@ jobs:
             os_arch=(${platform//\// })
             os=${os_arch[0]}
             arch=${os_arch[1]}
-            output_file="my_program_${os}_${arch}"
+            
+            dir_name="${os}_${arch}"
+            mkdir -p "$dir_name"
+
+            output_file="$dir_name/sshs"
 
             # Build the Go program for the specified OS and architecture
-            GOOS=$os GOARCH=$arch go build -o $output_file ./...
+            GOOS=$os GOARCH=$arch go build -o "$output_file" ./...
             echo "$output_file" >> artifacts.txt
           done
 

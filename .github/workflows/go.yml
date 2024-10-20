@@ -16,47 +16,51 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: '1.20'
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
 
-    - name: Build for all platforms
-      run: |
-        platforms=("linux/amd64" "linux/arm64" "windows/amd64" "windows/386" "darwin/amd64" "darwin/arm64" "freebsd/amd64" "freebsd/arm64" "openbsd/amd64" "openbsd/arm64" "netbsd/amd64" "netbsd/arm64")
-        for platform in "${platforms[@]}"; do
-          os_arch=(${platform//\// })
-          os=${os_arch[0]}
-          arch=${os_arch[1]}
-          output_file="my_program_${os}_${arch}"
+      - name: Build for all platforms
+        run: |
+          platforms=("linux/amd64" "linux/arm64" "windows/amd64" "windows/386" "darwin/amd64" "darwin/arm64" "freebsd/amd64" "freebsd/arm64" "openbsd/amd64" "openbsd/arm64" "netbsd/amd64" "netbsd/arm64")
+          for platform in "${platforms[@]}"; do
+            os_arch=(${platform//\// })
+            os=${os_arch[0]}
+            arch=${os_arch[1]}
+            output_dir="${os}_${arch}"
+            output_file="sshs"
 
-          # Build the Go program for the specified OS and architecture
-          GOOS=$os GOARCH=$arch go build -o $output_file ./...
-        done
+            # Create the output directory if it doesn't exist
+            mkdir -p "$output_dir"
 
-    - name: Test
-      run: go test -v ./...
+            # Build the Go program for the specified OS and architecture
+            GOOS=$os GOARCH=$arch go build -o "$output_dir/$output_file" ./...
+          done
 
-    - name: Generate SLSA Provenance
-      id: provenance
-      run: |
-        set -euo pipefail
+      - name: Test
+        run: go test -v ./...
 
-        # Generate SHA256 hashes of the built artifacts
-        files=$(ls my_program_* 2>/dev/null || true)
-        if [ -z "$files" ]; then
-          echo "No artifacts found!"
-          exit 1
-        fi
-        echo "hashes=$(sha256sum $files | base64 -w0)" >> "${GITHUB_OUTPUT}"
+      - name: Generate SLSA Provenance
+        id: provenance
+        run: |
+          set -euo pipefail
 
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: built-artifacts
-        path: my_program_*
+          # Generate SHA256 hashes of the built artifacts
+          files=$(find . -name 'sshs' -exec sha256sum {} \;)
+          if [ -z "$files" ]; then
+            echo "No artifacts found!"
+            exit 1
+          fi
+          echo "hashes=$(echo "$files" | base64 -w0)" >> "${GITHUB_OUTPUT}"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: built-artifacts
+          path: */sshs
 
   provenance:
     needs: [build]

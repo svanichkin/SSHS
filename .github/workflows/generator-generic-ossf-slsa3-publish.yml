@@ -1,16 +1,5 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-# This workflow lets you generate SLSA provenance file for your project.
-# The generation satisfies level 3 for the provenance requirements - see https://slsa.dev/spec/v0.1/requirements
-# The project is an initiative of the OpenSSF (openssf.org) and is developed at
-# https://github.com/slsa-framework/slsa-github-generator.
-# The provenance file can be verified using https://github.com/slsa-framework/slsa-verifier.
-# For more information about SLSA and how it improves the supply-chain, visit slsa.dev.
-
 name: SLSA generic generator
+
 on:
   workflow_dispatch:
   release:
@@ -33,12 +22,14 @@ jobs:
       - name: Build artifacts for all platforms
         run: |
           platforms=("linux/amd64" "linux/arm64" "windows/amd64" "windows/386" "darwin/amd64" "darwin/arm64" "freebsd/amd64" "freebsd/arm64" "openbsd/amd64" "openbsd/arm64" "netbsd/amd64" "netbsd/arm64")
+          mkdir -p releases
+          
           for platform in "${platforms[@]}"; do
             os_arch=(${platform//\// })
             os=${os_arch[0]}
             arch=${os_arch[1]}
             
-            dir_name="${os}_${arch}"
+            dir_name="releases/${os}_${arch}"
             mkdir -p "$dir_name"
 
             output_file="$dir_name/sshs"

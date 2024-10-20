@@ -56,6 +56,11 @@ jobs:
     name: Create GitHub Release
     needs: build
     runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        goos: [linux, darwin, windows]
+        goarch: [amd64, arm64, 386]
 
     steps:
       - name: Download binaries
@@ -66,6 +71,6 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: build/*
+          files: build/${{ matrix.goos }}-${{ matrix.goarch }}/sshs*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

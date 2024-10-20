@@ -14,6 +14,10 @@ jobs:
       matrix:
         goos: [linux, darwin, windows]
         goarch: [amd64, arm64, 386]
+      fail-fast: false
+      exclude:
+        - goos: darwin
+          goarch: 386
     
     steps:
       - name: Checkout repository

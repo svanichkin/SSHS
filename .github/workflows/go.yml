@@ -60,7 +60,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: built-artifacts
-          path: */sshs
+          path: sshs/
 
   provenance:
     needs: [build]

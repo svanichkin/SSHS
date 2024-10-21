@@ -101,10 +101,10 @@ jobs:
 
       - name: Check contents of extracted artifacts
         run: |
-          echo "Checking contents of each tar.gz file:"
-          for file in *.tar.gz; do
-            echo "Contents of $file:"
-            tar -tzf "$file" || echo "Failed to list contents of $file"
+          echo "Checking contents of each folder:"
+          for dir in */; do
+            echo "Contents of $dir:"
+            ls -la "$dir" || echo "Failed to list contents of $dir"
           done
 
       - name: Setup | Checksums

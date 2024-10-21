@@ -104,11 +104,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            sshs-linux-amd64.tar.gz
-            sshs-darwin-amd64.tar.gz
-            sshs-windows-amd64.tar.gz
-            sshs-linux-arm64.tar.gz
-            sshs-darwin-arm64.tar.gz
+            **/*.tar.gz  # Изменение здесь для захвата всех .tar.gz файлов
             *.sha256
           generate_release_notes: true
         env:

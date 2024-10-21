@@ -1,9 +1,13 @@
 name: Build and Release Go Project
 
+# on:
+  # push:
+    # tags:
+      # - 'v*.*.*'
 on:
   push:
-    tags:
-      - 'v*.*.*'
+    branches:
+      - main 
 
 jobs:
   build_check:

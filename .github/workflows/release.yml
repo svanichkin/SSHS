@@ -82,6 +82,11 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: List files before downloading artifacts
+        run: |
+          echo "Listing files before download:"
+          ls -la
+    
       - name: Setup | Download Artifacts
         uses: actions/download-artifact@v3
         with:
@@ -89,9 +94,18 @@ jobs:
 
       - name: List downloaded artifacts
         run: |
+          echo "Listing downloaded artifacts:"
           ls -la
           echo "Checking for tar.gz files"
           ls *.tar.gz || echo "No tar.gz files found"
+
+      - name: Check contents of extracted artifacts
+        run: |
+          echo "Checking contents of each tar.gz file:"
+          for file in *.tar.gz; do
+            echo "Contents of $file:"
+            tar -tzf "$file" || echo "Failed to list contents of $file"
+          done
 
       - name: Setup | Checksums
         run: |
@@ -109,7 +123,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            **/*.tar.gz  # Изменение здесь для захвата всех .tar.gz файлов
+            **/*.tar.gz
             *.sha256
           generate_release_notes: true
         env:

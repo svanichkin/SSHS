@@ -1,13 +1,9 @@
 name: Build and Release Go Project
 
-# on:
-  # push:
-    # tags:
-      # - 'v*.*.*'
 on:
   push:
-    branches:
-      - main 
+    tags:
+      - 'v*.*.*'
 
 jobs:
   build_check:
@@ -113,7 +109,6 @@ jobs:
 
       - name: Setup | Checksums
         run: |
-          # Находим все tar.gz файлы в подкаталогах и создаем для них контрольные суммы
           find . -name '*.tar.gz' | while read file; do
             openssl dgst -sha256 -r "$file" | awk '{print $1}' > "${file}.sha256"
           done
@@ -123,7 +118,7 @@ jobs:
         if: startsWith(github.ref, 'refs/heads/')
         with:
           files: |
-            **/*.tar.gz  # Изменение здесь для захвата всех .tar.gz файлов
+            **/*.tar.gz
             *.sha256
           generate_release_notes: true
         env:

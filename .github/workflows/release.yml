@@ -61,7 +61,7 @@ jobs:
 
       - name: Build
         run: |
-          GOOS=${{ matrix.os }} GOARCH=${{ matrix.target }} go build -o sshs ./...
+          GOOS=${{ matrix.os }} GOARCH=${{ matrix.target }} go build -o sshs .
           tar czvf ${{ matrix.name }}.tar.gz sshs
 
       - name: Upload the build as an artifact

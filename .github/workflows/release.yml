@@ -58,9 +58,9 @@ jobs:
       - name: Build
         run: |
           GOOS=${{ matrix.os }} GOARCH=${{ matrix.target }} go build -o sshs .
-          ls -la # Проверяем, создан ли файл sshs
           if [ -f "sshs" ]; then
             tar czvf ${{ matrix.name }}.tar.gz sshs
+            echo "Build succeeded: ${{ matrix.name }}.tar.gz created."
           else
             echo "Build failed: sshs not found."
             exit 1

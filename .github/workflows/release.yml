@@ -114,11 +114,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            sshs-darwin-amd64/*.tar.gz
-            sshs-darwin-arm64/*.tar.gz
-            sshs-linux-amd64/*.tar.gz
-            sshs-linux-arm64/*.tar.gz
-            sshs-windows-amd64/*.tar.gz
             **/*.tar.gz
           generate_release_notes: true
         env:

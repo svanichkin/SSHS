@@ -34,19 +34,15 @@ jobs:
           - target: amd64
             os: linux
             name: sshs-linux-amd64
-
           - target: amd64
             os: darwin
             name: sshs-darwin-amd64
-
           - target: amd64
             os: windows
             name: sshs-windows-amd64
-
           - target: arm64
             os: linux
             name: sshs-linux-arm64
-
           - target: arm64
             os: darwin
             name: sshs-darwin-arm64
@@ -62,7 +58,13 @@ jobs:
       - name: Build
         run: |
           GOOS=${{ matrix.os }} GOARCH=${{ matrix.target }} go build -o sshs .
-          tar czvf ${{ matrix.name }}.tar.gz sshs
+          ls -la # Проверяем, создан ли файл sshs
+          if [ -f "sshs" ]; then
+            tar czvf ${{ matrix.name }}.tar.gz sshs
+          else
+            echo "Build failed: sshs not found."
+            exit 1
+          fi
 
       - name: Upload the build as an artifact
         uses: actions/upload-artifact@v3
@@ -81,10 +83,16 @@ jobs:
           path: ./
 
       - name: List downloaded artifacts
-        run: ls -la
+        run: |
+          ls -la
+          echo "Checking for tar.gz files"
+          ls *.tar.gz || echo "No tar.gz files found"
 
       - name: Setup | Checksums
-        run: for file in *.tar.gz; do openssl dgst -sha256 -r "$file" | awk '{print $1}' > "${file}.sha256"; done
+        run: |
+          for file in *.tar.gz; do
+            openssl dgst -sha256 -r "$file" | awk '{print $1}' > "${file}.sha256"
+          done
 
       - name: Release | Add Artifacts to Release
         uses: softprops/action-gh-release@v1

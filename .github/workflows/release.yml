@@ -115,11 +115,10 @@ jobs:
 
       - name: Release | Add Artifacts to Release
         uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/heads/')
         with:
           files: |
             **/*.tar.gz
-            *.sha256
+            **/*.sha256
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -81,37 +81,30 @@ jobs:
     name: Release
     needs: build
     runs-on: ubuntu-latest
-    steps:
-      - name: List files before downloading artifacts
-        run: |
-          echo "Listing files:"
-          ls -la
-    
+    steps:    
       - name: Setup | Download Artifacts
         uses: actions/download-artifact@v3
         with:
           path: ./
           
-      - name: List downloaded artifacts
-        run: |
-          echo "Listing downloaded artifacts:"
-          ls -la
-          echo "Checking for tar.gz files"
-          find . -name '*.tar.gz' || echo "No tar.gz files found"
-
-      - name: Check contents of extracted artifacts
-        run: |
-          echo "Checking contents of each folder:"
-          for dir in */; do
-            echo "Contents of $dir:"
-            ls -la "$dir" || echo "Failed to list contents of $dir"
-          done
+#     - name: Check contents of extracted artifacts
+#       run: |
+#         echo "Checking contents of each folder:"
+#         for dir in */; do
+#           echo "Contents of $dir:"
+#           ls -la "$dir" || echo "Failed to list contents of $dir"
+#         done
 
       - name: Setup | Checksums
         run: |
           find . -name '*.tar.gz' | while read file; do
             openssl dgst -sha256 -r "$file" | awk '{print $1}' > "${file}.sha256"
           done
+
+      - name: List all files
+        run: |
+          echo "Listing files:"
+          ls -la
 
       - name: Release | Add Artifacts to Release
         uses: softprops/action-gh-release@v1

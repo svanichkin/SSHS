@@ -90,9 +90,14 @@ jobs:
 
       - name: Setup | Checksums
         run: |
-          for file in *.tar.gz; do
-            openssl dgst -sha256 -r "$file" | awk '{print $1}' > "${file}.sha256"
-          done
+          if ls *.tar.gz 1> /dev/null 2>&1; then
+            for file in *.tar.gz; do
+              openssl dgst -sha256 -r "$file" | awk '{print $1}' > "${file}.sha256"
+            done
+          else
+            echo "No tar.gz files to create checksums for."
+            exit 1
+          fi
 
       - name: Release | Add Artifacts to Release
         uses: softprops/action-gh-release@v1

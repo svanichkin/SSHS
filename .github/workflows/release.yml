@@ -71,6 +71,11 @@ jobs:
         with:
           name: ${{ matrix.name }}
           path: ${{ matrix.name }}.tar.gz
+          
+      - name: List files before uploading artifacts
+        run: |
+          echo "Listing files:"
+          ls -la
 
   release:
     name: Release

@@ -88,20 +88,20 @@ jobs:
     steps:
       - name: List files before downloading artifacts
         run: |
-          echo "Listing files before download:"
+          echo "Listing files:"
           ls -la
     
       - name: Setup | Download Artifacts
         uses: actions/download-artifact@v3
         with:
           path: ./
-
+          
       - name: List downloaded artifacts
         run: |
           echo "Listing downloaded artifacts:"
           ls -la
           echo "Checking for tar.gz files"
-          ls *.tar.gz || echo "No tar.gz files found"
+          find . -name '*.tar.gz' || echo "No tar.gz files found"
 
       - name: Check contents of extracted artifacts
         run: |
@@ -113,21 +113,17 @@ jobs:
 
       - name: Setup | Checksums
         run: |
-          if ls *.tar.gz 1> /dev/null 2>&1; then
-            for file in *.tar.gz; do
-              openssl dgst -sha256 -r "$file" | awk '{print $1}' > "${file}.sha256"
-            done
-          else
-            echo "No tar.gz files to create checksums for."
-            exit 1
-          fi
+          # Находим все tar.gz файлы в подкаталогах и создаем для них контрольные суммы
+          find . -name '*.tar.gz' | while read file; do
+            openssl dgst -sha256 -r "$file" | awk '{print $1}' > "${file}.sha256"
+          done
 
       - name: Release | Add Artifacts to Release
         uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/heads/')
         with:
           files: |
-            **/*.tar.gz
+            **/*.tar.gz  # Изменение здесь для захвата всех .tar.gz файлов
             *.sha256
           generate_release_notes: true
         env:
